@@ -11,9 +11,19 @@ task("accounts", "Prints the list of accounts", async (args, hre) => {
   }
 });
 
+task("tsetBasic", "Prints the list of accounts", async (args, hre) => {
+  
+});
+
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
 
 export default {
-  solidity: "0.8.8",
+  solidity: "0.8.7",
+  paths: {
+    sources: "./*/contracts",
+    tests: "./*/test",
+    cache: "./cache",
+    artifacts: "./artifacts"
+  },
 };
