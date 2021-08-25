@@ -5,15 +5,26 @@
     "@typechain/ethers-v5": "^7.0.1",
     "@typechain/hardhat": "^2.3.0",
     "@types/chai": "^4.2.21",
+    "@types/glob": "^7.1.4",
     "@types/mocha": "^9.0.0",
     "@types/node": "^16.7.1",
     "chai": "^4.3.4",
     "ethereum-waffle": "^3.4.0",
     "ethers": "^5.4.5",
+    "glob": "^7.1.7",
     "hardhat": "^2.6.1",
     "prettier": "2.3.2",
     "ts-node": "^10.2.1",
     "typechain": "^5.1.2",
     "typescript": "^4.3.5"
+  },
+  "scripts": {
+    "compile": "npx hardhat compile",
+    "test": "npx hardhat test",
+    "test:Basics": "npx hardhat testpart --name Basics",
+    "test:LangugeDescription": "npx hardhat testpart --name LangugeDescription",
+    "test:Compiler": "npx hardhat testpart --name Compiler",
+    "test:Internals": "npx hardhat testpart --name Internals",
+    "test:AdditionalMaterial": "npx hardhat testpart --name AdditionalMaterial"
   }
 }
