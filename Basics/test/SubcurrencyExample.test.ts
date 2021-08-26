@@ -28,7 +28,6 @@ describe('SubcurrencyExample', function () {
   });
 
   it('should minter has getter function', async function () {
-    console.log(Object.keys(subcurrencyExample));
     expect(typeof subcurrencyExample['minter()']).to.equals('function');
     expect(typeof subcurrencyExample['minter']).to.equals('function');
   });
@@ -77,6 +76,9 @@ describe('SubcurrencyExample', function () {
       )
         .to.emit(subcurrencyExample, 'Send')
         .withArgs(ownerAddress, user1Address, 10);
+
+      expect(await subcurrencyExample.balances(ownerAddress)).to.equals(amount - 10);
+      expect(await subcurrencyExample.balances(user1Address)).to.equals(amount + 10);
     });
   });
 });
