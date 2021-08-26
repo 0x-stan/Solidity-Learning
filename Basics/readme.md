@@ -24,7 +24,8 @@ SubcurrencyExample 合约是一个简单的 token 合约
 
 - `minter` 和 `balances` 变量因为是 public，编译器会自动为其生成 getter 函数
 - `balances` 是mapping类型，getter函数需要传入一个索引值
-- `mint` 只能被合约所有者调用，且没有做数值溢出检查
+- `mint()` 只能被合约所有者调用，且没有做数值溢出检查
+- `send()` 不能发送超过余额的数量，否则会抛错
 - `Send` 事件可以用来回溯交易记录
 
 ### Blockchain Basics

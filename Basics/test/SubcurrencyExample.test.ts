@@ -80,5 +80,12 @@ describe('SubcurrencyExample', function () {
       expect(await subcurrencyExample.balances(ownerAddress)).to.equals(amount - 10);
       expect(await subcurrencyExample.balances(user1Address)).to.equals(amount + 10);
     });
+
+    it('should send faild when amount > balance', async function () {
+      await expect(
+        subcurrencyExample.connect(owner).send(user1Address, amount + 10)
+      )
+        .to.be.revertedWith('InsufficientBalance(110, 100)')
+    });
   });
 });
