@@ -152,4 +152,8 @@ SubcurrencyExample 合约是一个简单的 token 合约
 
 ## Installing the Solidity Compiler
 
+略
+
 ## Solidity By Example
+
+### Voting
