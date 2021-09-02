@@ -47,6 +47,6 @@ describe('SimpleStorage', function () {
     const { abi } = require("../../artifacts/Basics/contracts/SimpleStorage.sol/SimpleStorage.json")
     const web3Contract = new web3.eth.Contract(abi, simpleStorage.address)
     const getRes = await web3Contract.methods.get().call()
-    console.log(getRes)
+    expect(getRes).to.equals('0')
   });
 });
