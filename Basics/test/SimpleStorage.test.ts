@@ -39,14 +39,18 @@ describe('SimpleStorage', function () {
   });
 
   it('test ethers.staticCall', async function () {
-    await simpleStorage.connect(user1).callStatic.set(1);
+    const staticRes = await simpleStorage.connect(user1).callStatic.set(1);
+    expect(staticRes).to.equals(1);
     expect(await simpleStorage.get()).to.equal(0);
   });
 
   it('test web3.call set()', async function () {
-    const { abi } = require("../../artifacts/Basics/contracts/SimpleStorage.sol/SimpleStorage.json")
-    const web3Contract = new web3.eth.Contract(abi, simpleStorage.address)
-    const getRes = await web3Contract.methods.get().call()
-    expect(getRes).to.equals('0')
+    const {
+      abi,
+    } = require('../../artifacts/Basics/contracts/SimpleStorage.sol/SimpleStorage.json');
+    const web3Contract = new web3.eth.Contract(abi, simpleStorage.address);
+    const setRes = await web3Contract.methods.set(1).call();
+    expect(setRes).to.equals('1');
+    expect(await simpleStorage.get()).to.equal(0);
   });
 });
