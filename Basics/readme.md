@@ -100,53 +100,53 @@ SubcurrencyExample 合约是一个简单的 token 合约
   - 每次读取固定限制为 256 bits
   - 而写入可以是 8 bits 或 256 bits
   - memory 是以 a word (256 bits) 为单位展开的
-  - 当读写操作触及一个从未展开过的word时，会展开该word
-  - 展开word的开销固定 256 bits (比如写入 8 bit 到未展开的word，实际开销将是展开256 bits)
+  - 当读写操作触及一个从未展开过的 word 时，会展开该 word
+  - 展开 word 的开销固定 256 bits (比如写入 8 bit 到未展开的 word，实际开销将是展开 256 bits)
 - stack
   - EVM 是基于堆栈的 （非寄存器）
-  - 栈最大有1024个元素，每个元素长度是一个字（256位）
-  - 只能操作栈顶（栈顶中的前16元素），取其中一到两个元素，运算完成后，将结果压入栈顶
+  - 栈最大有 1024 个元素，每个元素长度是一个字（256 位）
+  - 只能操作栈顶（栈顶中的前 16 元素），取其中一到两个元素，运算完成后，将结果压入栈顶
 
 #### Instruction Set
 
-- EVM的指令集应尽量少
+- EVM 的指令集应尽量少
 - 所有指令针对 word 操作
 - 常用的算术、位、逻辑和比较操作
 - 有条件和无条件跳转
-- 访问当前区块的相关属性，比如blockNumber和timestamp
+- 访问当前区块的相关属性，比如 blockNumber 和 timestamp
 
 #### Message Calls
 
-- Message Calls和 Transacation 非常类似，它们都有一个发送者、目标地址、数据、Ether、gas和返回数据
+- Message Calls 和 Transacation 非常类似，它们都有一个发送者、目标地址、数据、Ether、gas 和返回数据
 - 每个都有 top-level message ，它同时也可以创建更多的 message call
-- 合约可以决定gas的去留，当发生 `out-of-gas` 错误时（或其他错误），会将错误信息压入栈顶，这时，只有和 message call 一起发过来的gas会被耗尽
-- 调用合约默认会主动将异常冒泡 `bubble up` 
+- 合约可以决定 gas 的去留，当发生 `out-of-gas` 错误时（或其他错误），会将错误信息压入栈顶，这时，只有和 message call 一起发过来的 gas 会被耗尽
+- 调用合约默认会主动将异常冒泡 `bubble up`
 - `Calls` 被限制深度 1024，这意味着对于复杂操作应该优先使用循环而不是递归
-- 一个 message call 只能转发 63/64th 的gas，所以实际的深度比1024要小
+- 一个 message call 只能转发 63/64th 的 gas，所以实际的深度比 1024 要小
 
 #### Delegatecall / Callcode and Libraries
 
-- `delegatecall` 
-  - 是message call 的变体
+- `delegatecall`
+  - 是 message call 的变体
   - 目标地址的代码将在发起调用的合约的上下文中执行，`msg.sender` 和 `msg.value` 不变(和调用者相同)
-  - 这使得Solidity 可以实现可复用的代码库 `Libraries`
+  - 这使得 Solidity 可以实现可复用的代码库 `Libraries`
 
 #### Logs
 
 - 一种特殊的可索引的数据结构，其存储的数据可以一路映射直到区块层级
-- Solidity用其实现 event，合约创建之后无法访问日志，但是这些可以从区块链外高效访问
+- Solidity 用其实现 event，合约创建之后无法访问日志，但是这些可以从区块链外高效访问
 - 通过 `Bloom filter` 可以高效加密安全的搜索日志
 - 轻客户端可以访问日志
 
 #### Creat
 
-- 合约可以被特殊的opcode创建，即不是通过交易简单的调用零地址创建
-- `create calls` 和普通message calls的区别是执行完 `payload` 会将结果存储为代码(合约代码)，创建者会在堆栈上接收新合约的地址
+- 合约可以被特殊的 opcode 创建，即不是通过交易简单的调用零地址创建
+- `create calls` 和普通 message calls 的区别是执行完 `payload` 会将结果存储为代码(合约代码)，创建者会在堆栈上接收新合约的地址
 
 #### Deactivate and Self-destruct
 
-- `selfdestruct` 是销毁合约的唯一方法，该合约地址的Ether会被发送到指定目标，然后其存储值和代码将从状态中删除
-- 如果有人发送给Ether到已删除的合约地址，Ether就会消失了
+- `selfdestruct` 是销毁合约的唯一方法，该合约地址的 Ether 会被发送到指定目标，然后其存储值和代码将从状态中删除
+- 如果有人发送给 Ether 到已删除的合约地址，Ether 就会消失了
 - 即使合约被销毁，链上仍然会由历史数据
 - 即使合约代码中没有显示的调用 `selfdestruct` 的方法，它仍有可能通过 `delegatecall` 和 `callcode` 执行自毁
 
@@ -157,3 +157,40 @@ SubcurrencyExample 合约是一个简单的 token 合约
 ## Solidity By Example
 
 ### Voting
+
+简单的实习投票功能的合约，有三种角色
+
+- 主席
+  - 合约拥有者为主席
+  - 只有主席拥有分配投票权的能力
+    - 不能分配给已投票的选民新的投票权
+- 候选人
+  - 得票最多的候选人将胜出
+- 选民
+  - 每个选民投票权重 = 1
+  - voted 记录投票状态：未投、已投
+  - 当为投票时，可以将投票权委托给其他选民
+    - 当被委托者也未投票，委托给他的权重将在投票时一起累加
+    - 当被委托者已投票时，权重将直接累加
+
+相关文件
+
+- 合约文件 [BallotVoting.sol](./contracts/BallotVoting.sol)
+- 测试文件 [BallotVoting.test.ts](./test/BallotVoting.test.ts)
+
+### Subcurrency
+
+实现了一个简单的代币合约
+
+相关文件
+
+- 合约文件 [SubcurrencyExample.sol](./contracts/SubcurrencyExample.sol)
+- 测试文件 [SubcurrencyExample.test.ts](./test/SubcurrencyExample.test.ts)
+
+### Simple Open Auction
+
+公开拍卖合约。每个人都可以看到进行的投标，然后将此合同扩展为盲拍卖，在投标期结束之前无法看到实际出价。
+
+- 投标期间，每个人都可以发送投标。投标将包含转账金额和出价人信息绑定
+- 如果投标的最高价格提高，则退回之前投标人的钱
+- 投标结束后，投标受益人（卖家）必须手动调用合约，才能收到钱
