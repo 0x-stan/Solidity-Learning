@@ -6,7 +6,7 @@ import { Signer, Contract, utils, BigNumber } from 'ethers';
 import chai from 'chai';
 import { solidity } from 'ethereum-waffle';
 
-import { passBlocks, getBlcokTimestamp } from '../../utils';
+import { passBlocks, getBlcokTimestamp, GAS_PRICE, extendDecimals } from '../../utils';
 
 chai.use(solidity);
 
@@ -40,7 +40,6 @@ describe('SimpleAuction', function () {
   });
 
   describe('contructor()', async function () {
-
     it('should SimpleAuction initialize correctly.', async function () {
       await initializeProccess(60 * 1000, ownerAddress);
 
@@ -74,13 +73,37 @@ describe('SimpleAuction', function () {
       ).to.revertedWith('BidNotHighEnough(1)');
     });
 
-    it('Should highest changed and no pendingReturns increaseed after first bid().', async function () {
+    it('Should highest changed and no pendingReturns increaseed when first bid().', async function () {
       await initializeProccess(60 * 1000, ownerAddress);
 
       await simpleAuction.connect(user1).bid({ value: 1 });
-      await expect(
-        simpleAuction.connect(user1).bid({ value: 1 })
-      ).to.revertedWith('BidNotHighEnough(1)');
+      expect(await simpleAuction.highestBidder()).to.equals(user1Address);
+      expect(await simpleAuction.highestBid()).to.equals(1);
+    });
+
+    it('Should pendingReturns increaseed after first bid().', async function () {
+      await initializeProccess(60 * 1000, ownerAddress);
+
+      const one_eth = extendDecimals(1)
+      // first bid() and withdraw 0 eth
+      await simpleAuction.connect(user1).bid({ value: one_eth });
+      const balance1 = await user1.getBalance();
+      const withdraw_tx_1 = await simpleAuction.connect(user1).withdraw();
+      const { gasUsed: gasUsed1 } = await withdraw_tx_1.wait()
+      // balance changed = gasUsed
+      expect(balance1.sub(await user1.getBalance())).to.equals(
+        gasUsed1.mul(GAS_PRICE)
+      );
+
+      // second bid() and withdraw 1 eth
+      await simpleAuction.connect(user1).bid({ value: one_eth.mul(2) });
+      const balance2 = await user1.getBalance();
+      const withdraw_tx_2 = await simpleAuction.connect(user1).withdraw();
+      const { gasUsed: gasUsed2 } = await withdraw_tx_2.wait()
+      // balance changed = 1eth(withdraw) - gasUsed
+      expect(balance2.add(one_eth).sub(await user1.getBalance())).to.equals(
+        gasUsed2.mul(GAS_PRICE)
+      );
     });
   });
 });

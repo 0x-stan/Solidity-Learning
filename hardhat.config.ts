@@ -4,6 +4,7 @@ import '@nomiclabs/hardhat-web3';
 import { TASK_TEST } from 'hardhat/builtin-tasks/task-names';
 import * as path from 'path';
 import glob from 'glob';
+import { GAS_PRICE } from './utils/constants'
 
 async function getTestFiles(partName: string) {
   return new Promise((resolve, reject) => {
@@ -39,5 +40,10 @@ export default {
     tests: './*/test',
     cache: './cache',
     artifacts: './artifacts',
+  },
+  networks: {
+    hardhat: {
+      gasPrice: GAS_PRICE.toNumber(),
+    },
   },
 };

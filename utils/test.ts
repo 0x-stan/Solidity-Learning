@@ -4,6 +4,7 @@ import '@nomiclabs/hardhat-web3';
 
 // @ts-ignore: Unreachable code error
 import { ethers, web3 } from 'hardhat';
+const { BigNumber } = ethers;
 
 export async function getBlcokTimestamp() {
   const blockNumber = await ethers.provider.getBlockNumber();
@@ -45,4 +46,9 @@ export async function passBlocks(num: number) {
   for (let i = 0; i < num; i++) {
     await advanceBlock();
   }
+}
+
+export function extendDecimals(num: number | string, decimals: number = 18) {
+  let bi = BigNumber.from(num);
+  return bi.mul(BigNumber.from(10).pow(decimals));
 }
