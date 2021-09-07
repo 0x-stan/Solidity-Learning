@@ -43,7 +43,7 @@ export default {
   },
   networks: {
     hardhat: {
-      gasPrice: GAS_PRICE.toNumber(),
+      gasPrice: GAS_PRICE.toNumber(),   //  to calc gasUsed need a fixed value.
     },
   },
 };
