@@ -1,9 +1,11 @@
-import '@typechain/hardhat';
-import '@nomiclabs/hardhat-ethers';
-import '@nomiclabs/hardhat-web3';
+import "@typechain/hardhat";
+import "@nomiclabs/hardhat-ethers";
+import "@nomiclabs/hardhat-web3";
+
+import type { HttpProvider } from "web3-core";
 
 // @ts-ignore: Unreachable code error
-import { ethers, web3 } from 'hardhat';
+import { ethers, web3 } from "hardhat";
 const { BigNumber } = ethers;
 
 export async function getBlcokTimestamp() {
@@ -23,17 +25,19 @@ export async function advanceBlock() {
   return new Promise((resolve, reject) => {
     // evm_mine is a method of hardhat network
     // https://hardhat.org/hardhat-network/explanation/mining-modes.html#mining-modes
-    web3.currentProvider.send(
+    // @ts-node: disabled
+    (web3.currentProvider as HttpProvider).send(
       {
-        jsonrpc: '2.0',
-        method: 'evm_mine',
+        jsonrpc: "2.0",
+        method: "evm_mine",
+        params: [],
         id: new Date().getTime(),
       },
-      (err: any, result: any) => {
+      async (err: any, result: any) => {
         if (err) {
           return reject(err);
         }
-        const newBlockHash = web3.eth.getBlock('latest').hash;
+        const newBlockHash = (await web3.eth.getBlock("latest")).hash;
 
         return resolve(newBlockHash);
       }

@@ -48,7 +48,7 @@ contract BlindAuction {
         uint256 _biddingTime,
         uint256 _revealTime,
         address payable _beneficiary
-    ) public {
+    ) {
         beneficiary = _beneficiary;
         biddingEnd = block.timestamp + _biddingTime;
         revealEnd = biddingEnd + _revealTime;
@@ -73,9 +73,9 @@ contract BlindAuction {
     /// correctly blinded invalid bids and for all bids except for
     /// the totally highest.
     function reveal(
-        uint256[] _values,
-        bool[] _fake,
-        bytes32[] _secret
+        uint256[] calldata _values,
+        bool[] calldata _fake,
+        bytes32[] calldata _secret
     ) external onlyAfter(biddingEnd) onlyBefore(revealEnd) {
         // 取length长度，拿到memory中缓存，避免三次读取storage
         uint256 length = bids[msg.sender].length;
@@ -85,25 +85,27 @@ contract BlindAuction {
 
         uint256 refund;
         for (uint256 i = 0; i < length; i++) {
-            Bid storage bid = bids[msg.sender][i];
+            Bid storage _bid = bids[msg.sender][i];
             (uint256 value, bool fake, bytes32 secrect) = (
                 _values[i],
                 _fake[i],
                 _secret[i]
             );
 
-            if (bid.blindedBid != keccak256(value, fake, secrect)) {
+            if (
+                _bid.blindedBid != keccak256(abi.encode(value, fake, secrect))
+            ) {
                 continue;
             }
-            refund += bid.deposit;
-            if (!fake && bid.deposit >= value) {
+            refund += _bid.deposit;
+            if (!fake && _bid.deposit >= value) {
                 if (placeBid(msg.sender, value)) {
                     refund -= value;
                 }
             }
-            bid.blindedBid = bytes32(0);
+            _bid.blindedBid = bytes32(0);
         }
-        msg.sender.transfer(refund);
+        payable(msg.sender).transfer(refund);
     }
 
     function withdraw() external {

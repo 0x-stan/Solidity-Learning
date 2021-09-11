@@ -25,14 +25,17 @@ describe('BlindAuction', function () {
 
   let beginTime: number;
   let biddingTime: number;
+  let revealTime: number;
 
   async function initializeProccess(
     _biddingTime: number,
+    _revealTime: number,
     _onwerAddress: string
   ) {
     biddingTime = _biddingTime;
+    revealTime = _revealTime;
     const BlindAuction = await ethers.getContractFactory('BlindAuction');
-    blindAuction = await BlindAuction.deploy(biddingTime, ownerAddress);
+    blindAuction = await BlindAuction.deploy(biddingTime, revealTime, ownerAddress);
 
     // get block.timestamp when contract deployed
     beginTime = await getBlcokTimestamp();
@@ -47,10 +50,13 @@ describe('BlindAuction', function () {
 
   describe('contructor()', async function () {
     it('should BlindAuction initialize correctly.', async function () {
-      await initializeProccess(60, ownerAddress);
+      await initializeProccess(60, 60, ownerAddress);
 
-      expect(await blindAuction.auctionEndTime()).to.equals(
+      expect(await blindAuction.biddingEnd()).to.equals(
         beginTime + biddingTime
+      );
+      expect(await blindAuction.revealEnd()).to.equals(
+        beginTime + biddingTime + revealTime
       );
       expect(await blindAuction.beneficiary()).to.equals(ownerAddress);
     });
