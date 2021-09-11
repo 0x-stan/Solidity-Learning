@@ -2,29 +2,25 @@
 pragma solidity >=0.8.7;
 
 contract SimpleAuction {
-    
-    address payable public beneficiary;    // 受益人的收款地址
-    uint public auctionEndTime;     // 拍卖结束时间 (unix timestamps)
+    address payable public beneficiary; // 受益人的收款地址
+    uint256 public auctionEndTime; // 拍卖结束时间 (unix timestamps)
 
-    address public highestBidder;   // 当前出价最高的出标者
-    uint public highestBid;         // 当前出价最高的出标
+    address public highestBidder; // 当前出价最高的出标者
+    uint256 public highestBid; // 当前出价最高的出标
 
-    mapping(address => uint) pendingReturns;    // 记录出标的价格，允许赎回
+    mapping(address => uint256) pendingReturns; // 记录出标的价格，允许赎回
 
-    bool ended;  // 拍卖是否结束
+    bool ended; // 拍卖是否结束
 
-    event HighestBidIncreased(address bidder, uint ammount);    // 更新最高出标价的事件
-    event AuctionEnded(address winner, uint amount);            // 拍卖结束事件
+    event HighestBidIncreased(address bidder, uint256 ammount); // 更新最高出标价的事件
+    event AuctionEnded(address winner, uint256 amount); // 拍卖结束事件
 
     error AuctionAlreadyEnded();
-    error BidNotHighEnough(uint highestBid);
+    error BidNotHighEnough(uint256 highestBid);
     error AuctionNotYetEnded();
     error AuctionEndAlreadyCalled();
 
-    constructor(
-        uint biddingTime,
-        address payable beneficaryAddress
-    ) {
+    constructor(uint256 biddingTime, address payable beneficaryAddress) {
         beneficiary = beneficaryAddress;
         auctionEndTime = block.timestamp + biddingTime;
     }
@@ -32,12 +28,11 @@ contract SimpleAuction {
     // 竞标函数
     // 不需要入参，因为竞标人地址和出价都在msg中
     function bid() external payable {
-
         // 拍卖结束不能接受竞标
         if (block.timestamp > auctionEndTime) {
             revert AuctionAlreadyEnded();
-        } 
-        
+        }
+
         // 竞标价需要比当前最高价高
         if (msg.value <= highestBid) {
             revert BidNotHighEnough(highestBid);
@@ -61,12 +56,12 @@ contract SimpleAuction {
     // 赎回出标金额，返回成功还是失败的布尔值
     function withdraw() external returns (bool) {
         // 缓存可赎回数量
-        uint amount = pendingReturns[msg.sender];
+        uint256 amount = pendingReturns[msg.sender];
         // 当数量大于0，进入赎回操作
         if (amount > 0) {
             // 清空赎回数量
             pendingReturns[msg.sender] = 0;
-            
+
             // 尝试发送回赎回的金额
             // 当发送失败，还原可赎回数量，返回false
             if (!payable(msg.sender).send(amount)) {
@@ -87,10 +82,8 @@ contract SimpleAuction {
         // 如果三个操作混合在一起，可能会有安全问题，比如重入攻击
 
         // 1. Conditions
-        if (block.timestamp < auctionEndTime)
-            revert AuctionNotYetEnded();
-        if (ended)
-            revert AuctionEndAlreadyCalled();
+        if (block.timestamp < auctionEndTime) revert AuctionNotYetEnded();
+        if (ended) revert AuctionEndAlreadyCalled();
 
         // 2. Effects
         ended = true;

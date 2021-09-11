@@ -194,3 +194,11 @@ SubcurrencyExample 合约是一个简单的 token 合约
 - 投标期间，每个人都可以发送投标。投标将包含转账金额和出价人信息绑定
 - 如果投标的最高价格提高，则退回之前投标人的钱
 - 投标结束后，投标受益人（卖家）必须手动调用合约，才能收到钱
+
+相关文件
+
+- 合约文件 [SimpleAuction.sol](./contracts/SimpleAuction.sol)
+- 测试文件 [SimpleAuction.test.ts](./test/SimpleAuction.test.ts)
+
+### Blind Auction
+

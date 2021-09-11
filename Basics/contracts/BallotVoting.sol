@@ -32,23 +32,23 @@ contract BallotVoting {
     function giveRightToVote(address voter) external {
         require(
             msg.sender == chairperson,
-            'Only chairperson can give right to vote.'
+            "Only chairperson can give right to vote."
         );
-        require(!voters[voter].voted, 'The voter already voted.');
+        require(!voters[voter].voted, "The voter already voted.");
         require(voters[voter].weight == 0);
         voters[voter].weight = 1;
     }
 
     function delegate(address to) external {
         Voter storage sender = voters[msg.sender];
-        require(!sender.voted, 'You already voted.');
+        require(!sender.voted, "You already voted.");
 
-        require(to != msg.sender, 'Self-delegation is disallowed.');
+        require(to != msg.sender, "Self-delegation is disallowed.");
 
         while (voters[to].delegate != address(0)) {
             to = voters[to].delegate;
 
-            require(to != msg.sender, 'Found loop in delegation.');
+            require(to != msg.sender, "Found loop in delegation.");
         }
 
         sender.voted = true;
@@ -63,8 +63,8 @@ contract BallotVoting {
 
     function vote(uint256 proposal) external {
         Voter storage sender = voters[msg.sender];
-        require(sender.weight != 0, 'Has no right to vote');
-        require(!sender.voted, 'Already voted.');
+        require(sender.weight != 0, "Has no right to vote");
+        require(!sender.voted, "Already voted.");
         sender.voted = true;
         sender.vote = proposal;
 
@@ -72,7 +72,7 @@ contract BallotVoting {
     }
 
     function winningProposal() public view returns (uint256 _winningProposal) {
-        uint winningVoteCount = 0;
+        uint256 winningVoteCount = 0;
         for (uint256 p = 0; p < proposals.length; p++) {
             if (proposals[p].voteCount > winningVoteCount) {
                 winningVoteCount = proposals[p].voteCount;
