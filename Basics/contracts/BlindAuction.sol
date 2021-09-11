@@ -36,11 +36,11 @@ contract BlindAuction {
     // The new function body is the modifier's body where
     // `_` is replaced by the old function body.
     modifier onlyBefore(uint256 _time) {
-        require(block.timestamp < _time);
+        if (block.timestamp >= _time) revert TooLate(_time);
         _;
     }
     modifier onlyAfter(uint256 _time) {
-        require(block.timestamp > _time);
+        if (block.timestamp <= _time) revert TooEarly(_time);
         _;
     }
 
@@ -73,41 +73,43 @@ contract BlindAuction {
     /// correctly blinded invalid bids and for all bids except for
     /// the totally highest.
     function reveal(
-        uint256[] calldata _values,
-        bool[] calldata _fake,
-        bytes32[] calldata _secret
+        uint256[] calldata values,
+        bool[] calldata fakes,
+        bytes32[] calldata secrets
     ) external onlyAfter(biddingEnd) onlyBefore(revealEnd) {
-        // 取length长度，拿到memory中缓存，避免三次读取storage
         uint256 length = bids[msg.sender].length;
-        require(_values.length == length);
-        require(_fake.length == length);
-        require(_secret.length == length);
+        require(values.length == length);
+        require(fakes.length == length);
+        require(secrets.length == length);
 
         uint256 refund;
         for (uint256 i = 0; i < length; i++) {
-            Bid storage _bid = bids[msg.sender][i];
-            (uint256 value, bool fake, bytes32 secrect) = (
-                _values[i],
-                _fake[i],
-                _secret[i]
+            Bid storage bidToCheck = bids[msg.sender][i];
+            (uint256 value, bool fake, bytes32 secret) = (
+                values[i],
+                fakes[i],
+                secrets[i]
             );
-
             if (
-                _bid.blindedBid != keccak256(abi.encode(value, fake, secrect))
+                bidToCheck.blindedBid !=
+                keccak256(abi.encodePacked(value, fake, secret))
             ) {
+                // Bid was not actually revealed.
+                // Do not refund deposit.
                 continue;
             }
-            refund += _bid.deposit;
-            if (!fake && _bid.deposit >= value) {
-                if (placeBid(msg.sender, value)) {
-                    refund -= value;
-                }
+            refund += bidToCheck.deposit;
+            if (!fake && bidToCheck.deposit >= value) {
+                if (placeBid(msg.sender, value)) refund -= value;
             }
-            _bid.blindedBid = bytes32(0);
+            // Make it impossible for the sender to re-claim
+            // the same deposit.
+            bidToCheck.blindedBid = bytes32(0);
         }
         payable(msg.sender).transfer(refund);
     }
 
+    /// Withdraw a bid that was overbid.
     function withdraw() external {
         uint256 amount = pendingReturns[msg.sender];
         if (amount > 0) {
@@ -121,8 +123,10 @@ contract BlindAuction {
         }
     }
 
-    function auctionEnd() public onlyAfter(revealEnd) {
-        require(!ended);
+    /// End the auction and send the highest bid
+    /// to the beneficiary.
+    function auctionEnd() external onlyAfter(revealEnd) {
+        if (ended) revert AuctionEndAlreadyCalled();
         emit AuctionEnded(highestBidder, highestBid);
         ended = true;
         beneficiary.transfer(highestBid);
