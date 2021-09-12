@@ -215,3 +215,18 @@ SubcurrencyExample 合约是一个简单的 token 合约
 
 - 合约文件 [BlindAuction.sol](./contracts/BlindAuction.sol)
 - 测试文件 [BlindAuction.test.ts](./test/BlindAuction.test.ts)
+
+### Safe Remote Purchase
+
+安全的远程购买合约。
+
+- 卖家部署合约，同时锁定两倍于商品价格的eth在合约内
+  - 在有人买入之前可以撤销售卖，拿回锁定在合约的eth
+- 买家确认买入，转入两倍于商品价格的eth到合约
+- 买家确认收货，将买家的押金（一倍商品价格）eth转给卖家
+- 卖家回收资金，三倍于商品价格（2倍卖家自己的，1倍买家的购买资金）
+
+相关文件
+
+- 合约文件 [SafeRemotePurchase.sol](./contracts/SafeRemotePurchase.sol)
+- 测试文件 [SafeRemotePurchase.test.ts](./test/SafeRemotePurchase.test.ts)

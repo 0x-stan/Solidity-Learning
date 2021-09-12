@@ -45,7 +45,7 @@ describe('SimpleAuction', function () {
     user2Address = await user2.getAddress();
   });
 
-  describe('contructor()', async function () {
+  describe('constructor()', async function () {
     it('should SimpleAuction initialize correctly.', async function () {
       await initializeProccess(60, ownerAddress);
 

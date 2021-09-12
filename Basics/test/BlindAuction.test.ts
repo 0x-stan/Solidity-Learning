@@ -96,7 +96,7 @@ describe("BlindAuction", function () {
     user2Address = await user2.getAddress();
   });
 
-  describe("contructor()", async function () {
+  describe("constructor()", async function () {
     it("should BlindAuction initialize correctly.", async function () {
       await initializeProccess(60, 60, ownerAddress);
 
