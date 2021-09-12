@@ -230,3 +230,7 @@ SubcurrencyExample 合约是一个简单的 token 合约
 
 - 合约文件 [SafeRemotePurchase.sol](./contracts/SafeRemotePurchase.sol)
 - 测试文件 [SafeRemotePurchase.test.ts](./test/SafeRemotePurchase.test.ts)
+
+### ReceiverPays
+
+微支付通道合约。通过使用密码签名技术可以在相同的参与者之间 安全的、重复的、免手续费 的转移以太币。
