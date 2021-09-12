@@ -178,7 +178,7 @@ describe("BlindAuction", function () {
         .reveal(values_user2, fakes_user2, secrects_user2);
       const { gasUsed: gasUsed2 } = await reveal_tx_2.wait();
 
-      // user has recieved fake bid value
+      // user has received fake bid value
       expect(
         balance_user1.sub(gasUsed1.mul(GAS_PRICE)).add(values_user1[0])
       ).to.equals(await user1.getBalance());
@@ -211,7 +211,7 @@ describe("BlindAuction", function () {
       await passBlocks(10 + 1);
     });
 
-    it("Should beneficiary recieved true bid value after auctionEnd().", async function () {
+    it("Should beneficiary received true bid value after auctionEnd().", async function () {
       const balance_owner = await owner.getBalance();
 
       const auctionEnd_tx = await blindAuction.connect(owner).auctionEnd();
@@ -222,7 +222,7 @@ describe("BlindAuction", function () {
       ).to.equals(await owner.getBalance());
     });
 
-    it("Should user1 recieved overbid value after withdraw()", async function () {
+    it("Should user1 received overbid value after withdraw()", async function () {
       await blindAuction.connect(owner).auctionEnd();
 
       const balance_user1 = await user1.getBalance();
