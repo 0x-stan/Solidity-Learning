@@ -215,7 +215,7 @@ SubcurrencyExample 合约是一个简单的 token 合约
 
 - 合约文件 [BlindAuction.sol](./contracts/BlindAuction.sol)
 - 测试文件 [BlindAuction.test.ts](./test/BlindAuction.test.ts)
-
+****
 ### Safe Remote Purchase
 
 安全的远程购买合约。
@@ -234,3 +234,10 @@ SubcurrencyExample 合约是一个简单的 token 合约
 ### ReceiverPays
 
 微支付通道合约。通过使用密码签名技术可以在相同的参与者之间 安全的、重复的、免手续费 的转移以太币。
+
+合约工作有以下几步：
+
+- Alice 部署 ReceiverPays 合约, 并附上足够的以太来负担支付通道的付款。
+- Alice 通过自己的私钥签名来授权一个支付。
+- Alice 发送签名信息给Bob，这个信息是不需要保密的（稍后解释），用什么发送也无关紧要。
+- Bob 通过把签名信息提交给合约来索取这笔支付， 合约将验证信息的真实性并发送金额。
