@@ -1,24 +1,24 @@
-import '@typechain/hardhat';
-import '@nomiclabs/hardhat-ethers';
+import "@typechain/hardhat";
+import "@nomiclabs/hardhat-ethers";
 
-import { ethers } from 'hardhat';
-import { Signer, Contract, utils, BigNumber } from 'ethers';
-import chai from 'chai';
-import { solidity } from 'ethereum-waffle';
+import { ethers } from "hardhat";
+import { Signer, Contract, utils, BigNumber } from "ethers";
+import chai from "chai";
+import { solidity } from "ethereum-waffle";
 
 import {
   passBlocks,
   getBlcokTimestamp,
   GAS_PRICE,
   extendDecimals,
-} from '../../utils';
+} from "../../utils";
 
 chai.use(solidity);
 
 const { expect } = chai;
 
 const one_eth = extendDecimals(1);
-describe('SimpleAuction', function () {
+describe("SimpleAuction", function () {
   let owner: Signer, user1: Signer, user2: Signer;
   let ownerAddress: string, user1Address: string, user2Address: string;
   let simpleAuction: Contract;
@@ -31,7 +31,7 @@ describe('SimpleAuction', function () {
     _onwerAddress: string
   ) {
     biddingTime = _biddingTime;
-    const SimpleAuction = await ethers.getContractFactory('SimpleAuction');
+    const SimpleAuction = await ethers.getContractFactory("SimpleAuction");
     simpleAuction = await SimpleAuction.deploy(biddingTime, ownerAddress);
 
     // get block.timestamp when contract deployed
@@ -45,8 +45,8 @@ describe('SimpleAuction', function () {
     user2Address = await user2.getAddress();
   });
 
-  describe('constructor()', async function () {
-    it('should SimpleAuction initialize correctly.', async function () {
+  describe("constructor()", async function () {
+    it("should SimpleAuction initialize correctly.", async function () {
       await initializeProccess(60, ownerAddress);
 
       expect(await simpleAuction.auctionEndTime()).to.equals(
@@ -56,8 +56,8 @@ describe('SimpleAuction', function () {
     });
   });
 
-  describe('bid()', async function () {
-    it('Revert the call if the bidding period is over.', async function () {
+  describe("bid()", async function () {
+    it("Revert the call if the bidding period is over.", async function () {
       await initializeProccess(1, ownerAddress);
 
       await simpleAuction.connect(user1).bid({ value: 1 });
@@ -67,19 +67,19 @@ describe('SimpleAuction', function () {
       await passBlocks(1);
       await expect(
         simpleAuction.connect(user1).bid({ value: 2 })
-      ).to.revertedWith('AuctionAlreadyEnded()');
+      ).to.revertedWith("AuctionAlreadyEnded()");
     });
 
-    it('Revert the call if the bid is not greater then highestBid.', async function () {
+    it("Revert the call if the bid is not greater then highestBid.", async function () {
       await initializeProccess(60, ownerAddress);
 
       await simpleAuction.connect(user1).bid({ value: 1 });
       await expect(
         simpleAuction.connect(user1).bid({ value: 1 })
-      ).to.revertedWith('BidNotHighEnough(1)');
+      ).to.revertedWith("BidNotHighEnough(1)");
     });
 
-    it('Should highest changed and no pendingReturns increaseed when first bid().', async function () {
+    it("Should highest changed and no pendingReturns increaseed when first bid().", async function () {
       await initializeProccess(60, ownerAddress);
 
       await simpleAuction.connect(user1).bid({ value: 1 });
@@ -87,7 +87,7 @@ describe('SimpleAuction', function () {
       expect(await simpleAuction.highestBid()).to.equals(1);
     });
 
-    it('Should pendingReturns increaseed after first bid() and withdraw() correct value.', async function () {
+    it("Should pendingReturns increaseed after first bid() and withdraw() correct value.", async function () {
       await initializeProccess(60, ownerAddress);
 
       // first bid() and withdraw 0 eth
@@ -112,26 +112,26 @@ describe('SimpleAuction', function () {
     });
   });
 
-  describe('auctionEnd()', async function () {
-    it('Revert the call if still in the biddingTime.', async function () {
+  describe("auctionEnd()", async function () {
+    it("Revert the call if still in the biddingTime.", async function () {
       await initializeProccess(60, ownerAddress);
 
       await expect(simpleAuction.auctionEnd()).to.be.revertedWith(
-        'AuctionNotYetEnded()'
+        "AuctionNotYetEnded()"
       );
     });
 
-    it('Revert the call if already ended.', async function () {
+    it("Revert the call if already ended.", async function () {
       await initializeProccess(1, ownerAddress);
 
       await passBlocks(1);
       await simpleAuction.auctionEnd();
       await expect(simpleAuction.auctionEnd()).to.be.revertedWith(
-        'AuctionEndAlreadyCalled()'
+        "AuctionEndAlreadyCalled()"
       );
     });
 
-    it('Should owner recieve the bid.', async function () {
+    it("Should owner recieve the bid.", async function () {
       await initializeProccess(60, ownerAddress);
 
       await simpleAuction.connect(user1).bid({ value: one_eth });
@@ -140,16 +140,13 @@ describe('SimpleAuction', function () {
       const balance0 = await owner.getBalance();
       const auctionEndTx = await simpleAuction.auctionEnd();
       const { gasUsed, events } = await auctionEndTx.wait();
-      const { data, decode } = events[0]
-      const logAuctionEnded = decode(data)
-      console.log(logAuctionEnded.amount.toString())
+      const { data, decode } = events[0];
+      const logAuctionEnded = decode(data);
       expect(logAuctionEnded.winner).to.equals(user2Address);
       expect(logAuctionEnded.amount).to.equals(one_eth.mul(2));
-      // still have problem, cant calc balance correctly
-      // Expected "10001995641782999939349" to be equal 10001995581132000000000
-      // expect(balance0.sub(gasUsed).add(logAuctionEnded.amount)).to.equals(
-      //   await owner.getBalance()
-      // );
+      expect(
+        balance0.sub(gasUsed.mul(GAS_PRICE)).add(logAuctionEnded.amount)
+      ).to.equals(await owner.getBalance());
     });
   });
 });
