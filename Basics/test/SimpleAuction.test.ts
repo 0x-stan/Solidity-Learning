@@ -10,6 +10,7 @@ import {
   passBlocks,
   getBlcokTimestamp,
   GAS_PRICE,
+  ONE_ETH,
   extendDecimals,
 } from "../../utils";
 
@@ -17,7 +18,6 @@ chai.use(solidity);
 
 const { expect } = chai;
 
-const one_eth = extendDecimals(1);
 describe("SimpleAuction", function () {
   let owner: Signer, user1: Signer, user2: Signer;
   let ownerAddress: string, user1Address: string, user2Address: string;
@@ -91,7 +91,7 @@ describe("SimpleAuction", function () {
       await initializeProccess(60, ownerAddress);
 
       // first bid() and withdraw 0 eth
-      await simpleAuction.connect(user1).bid({ value: one_eth });
+      await simpleAuction.connect(user1).bid({ value: ONE_ETH });
       const balance1 = await user1.getBalance();
       const withdraw_tx_1 = await simpleAuction.connect(user1).withdraw();
       const { gasUsed: gasUsed1 } = await withdraw_tx_1.wait();
@@ -101,12 +101,12 @@ describe("SimpleAuction", function () {
       );
 
       // second bid() and withdraw 1 eth
-      await simpleAuction.connect(user1).bid({ value: one_eth.mul(2) });
+      await simpleAuction.connect(user1).bid({ value: ONE_ETH.mul(2) });
       const balance2 = await user1.getBalance();
       const withdraw_tx_2 = await simpleAuction.connect(user1).withdraw();
       const { gasUsed: gasUsed2 } = await withdraw_tx_2.wait();
       // balance changed = 1eth(withdraw) - gasUsed
-      expect(balance2.add(one_eth).sub(await user1.getBalance())).to.equals(
+      expect(balance2.add(ONE_ETH).sub(await user1.getBalance())).to.equals(
         gasUsed2.mul(GAS_PRICE)
       );
     });
@@ -134,8 +134,8 @@ describe("SimpleAuction", function () {
     it("Should owner recieve the bid.", async function () {
       await initializeProccess(60, ownerAddress);
 
-      await simpleAuction.connect(user1).bid({ value: one_eth });
-      await simpleAuction.connect(user2).bid({ value: one_eth.mul(2) });
+      await simpleAuction.connect(user1).bid({ value: ONE_ETH });
+      await simpleAuction.connect(user2).bid({ value: ONE_ETH.mul(2) });
       await passBlocks(100);
       const balance0 = await owner.getBalance();
       const auctionEndTx = await simpleAuction.auctionEnd();
@@ -143,7 +143,7 @@ describe("SimpleAuction", function () {
       const { data, decode } = events[0];
       const logAuctionEnded = decode(data);
       expect(logAuctionEnded.winner).to.equals(user2Address);
-      expect(logAuctionEnded.amount).to.equals(one_eth.mul(2));
+      expect(logAuctionEnded.amount).to.equals(ONE_ETH.mul(2));
       expect(
         balance0.sub(gasUsed.mul(GAS_PRICE)).add(logAuctionEnded.amount)
       ).to.equals(await owner.getBalance());

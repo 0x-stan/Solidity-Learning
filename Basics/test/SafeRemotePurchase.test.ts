@@ -10,14 +10,13 @@ import {
   passBlocks,
   getBlcokTimestamp,
   GAS_PRICE,
+  ONE_ETH,
   extendDecimals,
 } from "../../utils";
 
 chai.use(solidity);
 
 const { expect } = chai;
-
-const one_eth = extendDecimals(1);
 
 describe("SafeRemotePurchase", function () {
   let owner: Signer, user1: Signer, user2: Signer;
@@ -40,42 +39,42 @@ describe("SafeRemotePurchase", function () {
 
   describe("constructor()", async function () {
     it("Revert init with an odd number value", async function () {
-      await expect(initializeProccess(one_eth.add(1))).to.revertedWith(
+      await expect(initializeProccess(ONE_ETH.add(1))).to.revertedWith(
         "ValueNotEven()"
       );
     });
 
     it("should SafeRemotePurchase initialize correctly.", async function () {
-      await initializeProccess(one_eth.mul(2));
-      expect(await safeRemotePurchase.value()).to.equals(one_eth);
+      await initializeProccess(ONE_ETH.mul(2));
+      expect(await safeRemotePurchase.value()).to.equals(ONE_ETH);
     });
   });
 
   describe("abort()", async function () {
     it("should seller can reclaim his ether by abort().", async function () {
-      await initializeProccess(one_eth.mul(2));
+      await initializeProccess(ONE_ETH.mul(2));
 
       const balance_1 = await owner.getBalance();
       const tx = await safeRemotePurchase.abort();
       const { gasUsed } = await tx.wait();
 
       expect(
-        balance_1.sub(gasUsed.mul(GAS_PRICE)).add(one_eth.mul(2))
+        balance_1.sub(gasUsed.mul(GAS_PRICE)).add(ONE_ETH.mul(2))
       ).to.equals(await owner.getBalance());
     });
 
     it("Revert when buyer has confirmed.", async function () {
-      await initializeProccess(one_eth.mul(2));
+      await initializeProccess(ONE_ETH.mul(2));
       await safeRemotePurchase
         .connect(user1)
-        .confirmPurchase({ value: one_eth.mul(2) });
+        .confirmPurchase({ value: ONE_ETH.mul(2) });
       await expect(safeRemotePurchase.connect(owner).abort()).to.be.reverted;
     });
   });
 
   describe("confirmPurchase()", async function () {
     it("should seller can reclaim his ether by abort().", async function () {
-      await initializeProccess(one_eth.mul(2));
+      await initializeProccess(ONE_ETH.mul(2));
 
       const balance_1 = await owner.getBalance();
       const tx = await safeRemotePurchase.abort();
@@ -84,26 +83,26 @@ describe("SafeRemotePurchase", function () {
       // state = Inactive
       expect(await safeRemotePurchase.state()).to.equals(3);
       expect(
-        balance_1.sub(gasUsed.mul(GAS_PRICE)).add(one_eth.mul(2))
+        balance_1.sub(gasUsed.mul(GAS_PRICE)).add(ONE_ETH.mul(2))
       ).to.equals(await owner.getBalance());
     });
 
     it("Revert when buyer has confirmed.", async function () {
-      await initializeProccess(one_eth.mul(2));
+      await initializeProccess(ONE_ETH.mul(2));
       await safeRemotePurchase
         .connect(user1)
-        .confirmPurchase({ value: one_eth.mul(2) });
+        .confirmPurchase({ value: ONE_ETH.mul(2) });
       await expect(safeRemotePurchase.connect(owner).abort()).to.be.reverted;
     });
   });
 
   describe("confirmReceived()", async function () {
     it("Should release the locked ehter.", async function () {
-      await initializeProccess(one_eth.mul(2));
+      await initializeProccess(ONE_ETH.mul(2));
 
       await safeRemotePurchase
         .connect(user1)
-        .confirmPurchase({ value: one_eth.mul(2) });
+        .confirmPurchase({ value: ONE_ETH.mul(2) });
 
       const balance_1 = await user1.getBalance();
       const tx = await safeRemotePurchase.connect(user1).confirmReceived();
@@ -111,16 +110,16 @@ describe("SafeRemotePurchase", function () {
 
       expect(await safeRemotePurchase.state()).to.equals(2);
       expect(
-        balance_1.sub(gasUsed.mul(GAS_PRICE)).add(one_eth.mul(1))
+        balance_1.sub(gasUsed.mul(GAS_PRICE)).add(ONE_ETH.mul(1))
       ).to.equals(await user1.getBalance());
     });
 
     it("Revert when buyer has confirmed.", async function () {
-      await initializeProccess(one_eth.mul(2));
+      await initializeProccess(ONE_ETH.mul(2));
 
       await safeRemotePurchase
         .connect(user1)
-        .confirmPurchase({ value: one_eth.mul(2) });
+        .confirmPurchase({ value: ONE_ETH.mul(2) });
 
       await safeRemotePurchase.connect(user1).confirmReceived();
 
@@ -136,11 +135,11 @@ describe("SafeRemotePurchase", function () {
 
   describe("refundSeller()", async function () {
     it("Should pays back the locked funds of the seller (3 * value).", async function () {
-      await initializeProccess(one_eth.mul(2));
+      await initializeProccess(ONE_ETH.mul(2));
 
       await safeRemotePurchase
         .connect(user1)
-        .confirmPurchase({ value: one_eth.mul(2) });
+        .confirmPurchase({ value: ONE_ETH.mul(2) });
 
       await safeRemotePurchase.connect(user1).confirmReceived();
 
@@ -150,7 +149,7 @@ describe("SafeRemotePurchase", function () {
 
       expect(await safeRemotePurchase.state()).to.equals(3);
       expect(
-        balance_1.sub(gasUsed.mul(GAS_PRICE)).add(one_eth.mul(3))
+        balance_1.sub(gasUsed.mul(GAS_PRICE)).add(ONE_ETH.mul(3))
       ).to.equals(await owner.getBalance());
     });
 

@@ -12,14 +12,13 @@ import {
   passBlocks,
   getBlcokTimestamp,
   GAS_PRICE,
+  ONE_ETH,
   extendDecimals,
 } from "../../utils";
 
 chai.use(solidity);
 
 const { expect } = chai;
-
-const one_eth = extendDecimals(1);
 
 const packRevealParams = (value: BigNumber, fake: boolean, secret: string) => {
   return solidityKeccak256(
@@ -28,8 +27,8 @@ const packRevealParams = (value: BigNumber, fake: boolean, secret: string) => {
   );
 };
 
-const values_user1 = [one_eth.mul(1), one_eth.mul(2)];
-const values_user2 = [one_eth.mul(3), one_eth.mul(1)];
+const values_user1 = [ONE_ETH.mul(1), ONE_ETH.mul(2)];
+const values_user2 = [ONE_ETH.mul(3), ONE_ETH.mul(1)];
 const fakes_user1 = [true, false];
 const fakes_user2 = [false, true];
 const secrects_user1 = [
@@ -114,23 +113,23 @@ describe("BlindAuction", function () {
     it("should bids stored bid data.", async function () {
       await initializeProccess(10, 10, ownerAddress);
       const bidid = ethers.utils.formatBytes32String("user1_bid1");
-      await blindAuction.connect(user1).bid(bidid, { value: one_eth });
+      await blindAuction.connect(user1).bid(bidid, { value: ONE_ETH });
 
       const bidData = await blindAuction.bids(user1Address, 0);
       expect(bidData.blindedBid).to.equals(bidid);
-      expect(bidData.deposit).to.equals(one_eth);
+      expect(bidData.deposit).to.equals(ONE_ETH);
     });
 
     it("Revert when bid time ended.", async function () {
       await initializeProccess(10, 1, ownerAddress);
       const bid1 = ethers.utils.formatBytes32String("user1_bid1");
-      await blindAuction.connect(user1).bid(bid1, { value: one_eth });
+      await blindAuction.connect(user1).bid(bid1, { value: ONE_ETH });
 
       await passBlocks(11);
 
       const bid2 = ethers.utils.formatBytes32String("user1_bid1");
       await expect(
-        blindAuction.connect(user1).bid(bid2, { value: one_eth })
+        blindAuction.connect(user1).bid(bid2, { value: ONE_ETH })
       ).to.revertedWith(`TooLate(${beginTime + biddingTime})`);
     });
   });

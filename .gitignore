@@ -34,3 +34,4 @@ node_modules/
 # hardhat
 cache
 artifacts
+typechain/

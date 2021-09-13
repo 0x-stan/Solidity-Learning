@@ -241,3 +241,10 @@ SubcurrencyExample 合约是一个简单的 token 合约
 - Alice 通过自己的私钥签名来授权一个支付。
 - Alice 发送签名信息给Bob，这个信息是不需要保密的（稍后解释），用什么发送也无关紧要。
 - Bob 通过把签名信息提交给合约来索取这笔支付， 合约将验证信息的真实性并发送金额。
+
+参考链接
+
+- EIP-191 https://eips.ethereum.org/EIPS/eip-191
+- EIP-712 https://eips.ethereum.org/EIPS/eip-712
+- geth rpc personal_sign https://geth.ethereum.org/docs/rpc/ns-personal#personal_sign
+- [METAMASK sign data a breif history](https://docs.metamask.io/guide/signing-data.html#a-brief-history)

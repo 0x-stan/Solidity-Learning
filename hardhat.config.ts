@@ -1,10 +1,10 @@
-import { subtask, task } from 'hardhat/config';
 import '@nomiclabs/hardhat-waffle';
 import '@nomiclabs/hardhat-web3';
+import { GAS_PRICE } from './utils/constants'
+import { subtask, task } from 'hardhat/config';
 import { TASK_TEST } from 'hardhat/builtin-tasks/task-names';
 import * as path from 'path';
 import glob from 'glob';
-import { GAS_PRICE } from './utils/constants'
 
 async function getTestFiles(partName: string) {
   return new Promise((resolve, reject) => {

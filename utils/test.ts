@@ -2,15 +2,14 @@ import "@typechain/hardhat";
 import "@nomiclabs/hardhat-ethers";
 import "@nomiclabs/hardhat-web3";
 
-import type { HttpProvider } from "web3-core";
-
 // @ts-ignore: Unreachable code error
 import { ethers, web3 } from "hardhat";
-const { BigNumber } = ethers;
+
+const provider = ethers.provider;
 
 export async function getBlcokTimestamp() {
-  const blockNumber = await ethers.provider.getBlockNumber();
-  return (await ethers.provider.getBlock(blockNumber)).timestamp;
+  const blockNumber = await provider.getBlockNumber();
+  return (await provider.getBlock(blockNumber)).timestamp;
 }
 
 export async function wait(time: number) {
@@ -22,27 +21,9 @@ export async function wait(time: number) {
 }
 
 export async function advanceBlock() {
-  return new Promise((resolve, reject) => {
-    // evm_mine is a method of hardhat network
-    // https://hardhat.org/hardhat-network/explanation/mining-modes.html#mining-modes
-    // @ts-node: disabled
-    (web3.currentProvider as HttpProvider).send(
-      {
-        jsonrpc: "2.0",
-        method: "evm_mine",
-        params: [],
-        id: new Date().getTime(),
-      },
-      async (err: any, result: any) => {
-        if (err) {
-          return reject(err);
-        }
-        const newBlockHash = (await web3.eth.getBlock("latest")).hash;
-
-        return resolve(newBlockHash);
-      }
-    );
-  });
+  // evm_mine is a method of hardhat network
+  // https://hardhat.org/hardhat-network/explanation/mining-modes.html#mining-modes
+  return provider.send("evm_mine", []);
 }
 
 export async function passBlocks(num: number) {
@@ -52,7 +33,3 @@ export async function passBlocks(num: number) {
   }
 }
 
-export function extendDecimals(num: number | string, decimals: number = 18) {
-  let bi = BigNumber.from(num);
-  return bi.mul(BigNumber.from(10).pow(decimals));
-}
