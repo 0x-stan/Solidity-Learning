@@ -8,6 +8,7 @@ contract ReceiverPays {
 
     constructor() payable {}
 
+    event Message(bytes32 message);
     function claimPayment(
         uint256 amount,
         uint256 nonce,
@@ -17,11 +18,13 @@ contract ReceiverPays {
         usedNonces[nonce] = true;
 
         // this recreates the message that was signed on the client
-        bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, amount, nonce, this)));
+        bytes32 _hash = keccak256(abi.encodePacked(msg.sender, amount, nonce, this));
+        bytes32 message = prefixed(_hash);
+        emit Message(_hash);
 
-        require(recoverSigner(message, signature) == owner);
+        // require(recoverSigner(message, signature) == owner, "Not Owner.");
 
-        payable(msg.sender).transfer(amount);
+        // payable(msg.sender).transfer(amount);
     }
 
     /// destory the contract and relaim the leftover funds.

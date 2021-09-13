@@ -1,10 +1,13 @@
 import '@nomiclabs/hardhat-waffle';
 import '@nomiclabs/hardhat-web3';
-import { GAS_PRICE } from './utils/constants'
+import dotenv from 'dotenv';
+import { TEST_ACCOUNTS_PRIVATES, GAS_PRICE, ONE_ETH } from './utils/constants'
 import { subtask, task } from 'hardhat/config';
 import { TASK_TEST } from 'hardhat/builtin-tasks/task-names';
 import * as path from 'path';
 import glob from 'glob';
+
+dotenv.config();
 
 async function getTestFiles(partName: string) {
   return new Promise((resolve, reject) => {
@@ -16,6 +19,16 @@ async function getTestFiles(partName: string) {
       resolve(files);
     });
   });
+}
+
+function getAccounts() {
+  const privates = (process.env[`${TEST_ACCOUNTS_PRIVATES}`] as string).split(',') as string[]
+  return privates.map(_p => {
+    return {
+      privateKey: _p,
+      balance: ONE_ETH.mul(100).toString()
+    }
+  })
 }
 
 // 针对章节测试
@@ -30,8 +43,10 @@ task('testpart', 'test a part')
     });
   });
 
+
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
+// console.log((process.env[`${TEST_ACCOUNTS_PRIVATES}`] as string).split(','))
 
 export default {
   solidity: '0.8.7',
@@ -44,6 +59,7 @@ export default {
   networks: {
     hardhat: {
       gasPrice: GAS_PRICE.toNumber(),   //  to calc gasUsed need a fixed value.
+      accounts: getAccounts()
     },
   },
 };

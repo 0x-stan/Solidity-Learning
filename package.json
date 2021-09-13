@@ -11,6 +11,7 @@
     "@types/mocha": "^9.0.0",
     "@types/node": "^16.7.1",
     "chai": "^4.3.4",
+    "dotenv": "^10.0.0",
     "ethereum-waffle": "^3.4.0",
     "ethers": "^5.4.5",
     "glob": "^7.1.7",
@@ -23,6 +24,7 @@
     "web3": "^1.5.2"
   },
   "scripts": {
+    "createAccounts": "npx ts-node ./createTestAccounts.ts",
     "compile": "npx hardhat compile",
     "test": "npx hardhat test",
     "test:Basics": "npx hardhat testpart --name Basics",

@@ -9,6 +9,10 @@ import { expect } from "chai";
 
 import { GAS_PRICE, ONE_ETH } from "../../utils";
 
+const { solidityKeccak256, solidityPack, keccak256, hashMessage } =
+  ethers.utils;
+
+const init_money = ONE_ETH.mul(10);
 describe("ReceiverPays", function () {
   let Alice: Signer, Bob: Signer;
   let AliceAddress: string, BobAddress: string;
@@ -19,8 +23,7 @@ describe("ReceiverPays", function () {
     AliceAddress = await Alice.getAddress();
     BobAddress = await Bob.getAddress();
     const ReceiverPays = await ethers.getContractFactory("ReceiverPays");
-    receiverPays = await ReceiverPays.deploy({ value: ONE_ETH });
-    // await receiverPays.deplyed();
+    receiverPays = await ReceiverPays.deploy({ value: init_money });
   });
 
   describe("shutdown()", async function () {
@@ -34,8 +37,33 @@ describe("ReceiverPays", function () {
       const tx = await receiverPays.connect(Alice).shutdown();
       const { gasUsed } = await tx.wait();
 
-      expect(balance_1.sub(gasUsed.mul(GAS_PRICE)).add(ONE_ETH)).to.equals(
+      expect(balance_1.sub(gasUsed.mul(GAS_PRICE)).add(init_money)).to.equals(
         await Alice.getBalance()
+      );
+    });
+  });
+
+  describe("claimPayment()", async function () {
+    it("Should Bob can receive money by Alice's signature.", async function () {
+      const message = hashMessage(
+        solidityPack(
+          ["address", "uint256", "uint256", "address"],
+          [BobAddress, ONE_ETH, 1, receiverPays.address]
+        )
+      );
+      const signature = await Alice.signMessage(message);
+
+      const balance_1 = await Bob.getBalance();
+
+      const tx = await receiverPays
+        .connect(Bob)
+        .claimPayment(ONE_ETH, 1, signature);
+      const { gasUsed, events } = await tx.wait();
+      console.log(message);
+      console.log(await events[0].decode(events[0].data));
+
+      expect(balance_1.sub(gasUsed.mul(GAS_PRICE)).add(ONE_ETH)).to.equals(
+        await Bob.getBalance()
       );
     });
   });
