@@ -8,7 +8,7 @@ contract ReceiverPays {
 
     constructor() payable {}
 
-    event Message(bytes32 message);
+    event Message(address _owner, bytes32 message);
     function claimPayment(
         uint256 amount,
         uint256 nonce,
@@ -18,9 +18,11 @@ contract ReceiverPays {
         usedNonces[nonce] = true;
 
         // this recreates the message that was signed on the client
-        bytes32 _hash = keccak256(abi.encodePacked(msg.sender, amount, nonce, this));
+        // bytes32 _hash = keccak256(abi.encodePacked(msg.sender, amount, nonce, this));
+        bytes32 _hash = keccak256(abi.encodePacked(msg.sender));
         bytes32 message = prefixed(_hash);
-        emit Message(_hash);
+        address _o = recoverSigner(message, signature);
+        emit Message(_o, message);
 
         // require(recoverSigner(message, signature) == owner, "Not Owner.");
 
@@ -64,7 +66,7 @@ contract ReceiverPays {
     }
 
     /// builds a prefixed hash to mimic the behavior of eth_sign.
-    function prefixed(bytes32 hash) internal pure returns (bytes32) {
+    function prefixed(bytes32 hash) public pure returns (bytes32) {
         return keccak256(abi.encodePacked("\x19Ethereum Signed Msaage:\n32", hash));
     }
 
