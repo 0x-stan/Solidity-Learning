@@ -248,6 +248,3 @@ SubcurrencyExample 合约是一个简单的 token 合约
 - EIP-712 https://eips.ethereum.org/EIPS/eip-712
 - geth rpc personal_sign https://geth.ethereum.org/docs/rpc/ns-personal#personal_sign
 - [METAMASK sign data a breif history](https://docs.metamask.io/guide/signing-data.html#a-brief-history)
-
-test new line1
-test new line2
